@@ -314,7 +314,6 @@ void checarSensores(void)
   {
     //Serial.println("Caixa Vazia");
     flagLigaCaixa = 1;
-    //flagSelecao = 1;
   }
 
   nivel = digitalRead(SENSOR_NIVEL_ALTO);
@@ -330,7 +329,6 @@ void checarSensores(void)
   if(!nivel)
   {
     flagLigaBomba = 1;
-    //flagSelecao = 2;
   }
   else
   {
@@ -419,7 +417,7 @@ void encherCaixa(void)
   {
     flagOcupado = 1;
     reles.offAll();
-    //delay(2000);
+    delay(2000);
     reles.on(1);
     delay(5000);
     reles.on(0);
@@ -442,7 +440,7 @@ void ligaBomba(void)
   if((flagLigaBomba)&& (!flagOcupado))
   {
     reles.offAll();
-    //delay(2000);
+    delay(2000);
     flagOcupado = 1;
     reles.on(0);
     Serial.println("Bomba Ligada");
@@ -463,7 +461,7 @@ void ligaSetor1(void)
   {
     flagOcupado = 1;
     reles.offAll();
-    //delay(2000);
+    delay(2000);
     reles.on(2);
     delay(5000);
     reles.on(0);
@@ -487,7 +485,7 @@ void ligaSetor2(void)
   {
     flagOcupado = 1;
     reles.offAll();
-    //delay(2000);
+    delay(2000);
     reles.on(3);
     delay(5000);
     reles.on(0);
