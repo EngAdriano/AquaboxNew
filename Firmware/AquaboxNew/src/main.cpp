@@ -44,10 +44,13 @@ struct tempoAtual
 {
   int hInicioSetor1 = 0;                      //Hora real de início da irrigação
   int mInicioSetor1 = 0;                     //minutos real de início da irrigação
+  int hFimSetor1 = 0;
+  int mFimSetor1 = 0;
   int hInicioSetor2 = 0;                      //Hora real de início da irrigação
   int mInicioSetor2 = 0;                    //minutos real de início da irrigação
+  int hFimSetor2 = 0;
+  int mFimSetor2 = 0;
 };
-
 
 //---- WiFi settings
 const char* ssid = "Lu e Deza";
@@ -130,7 +133,7 @@ void encherCaixa(void);
 void ligaBomba(void);
 void ligaSetor1(void);
 void ligaSetor2(void);
-void calculoTempo(int hInicio, int mInicio);
+void calculoTempo(int hInicio, int mInicio, int setor);
 
 
 void setup() 
@@ -197,7 +200,7 @@ void setup_wifi(void)
 
   Serial.println("");
   Serial.println("WiFi conectado");
-  Serial.println("Endereço IP: ");
+  Serial.print("Endereço IP: ");
   Serial.println(WiFi.localIP());
 }
 
@@ -335,17 +338,26 @@ void checarSensores(void)
     flagLigaBomba = 0;
   }
 
-  if((timeinfo.tm_hour == conf_Irriga.horaInicioSetor1) && (timeinfo.tm_min == conf_Irriga.minutoInicioSetor1))
+  if((timeinfo.tm_hour == conf_Irriga.horaInicioSetor1) && (timeinfo.tm_min == conf_Irriga.minutoInicioSetor1) && (conf_Irriga.diaDaSemana[timeinfo.tm_wday]))
   {
     flagLigaSetor1 = 1;
   }
 
-  if((timeinfo.tm_hour == conf_Irriga.horaInicioSetor2) && (timeinfo.tm_min == conf_Irriga.minutoInicioSetor2))
+  if((timeinfo.tm_hour == conf_Irriga.horaInicioSetor2) && (timeinfo.tm_min == conf_Irriga.minutoInicioSetor2) && (conf_Irriga.diaDaSemana[timeinfo.tm_wday]))
   {
     flagLigaSetor2 = 1;
   }
 
-  
+  if((timeinfo.tm_hour == tempo_Irriga.hFimSetor1) && (timeinfo.tm_min == tempo_Irriga.mFimSetor1))
+  {
+    flagLigaSetor1 = 0;
+  }
+
+  if((timeinfo.tm_hour == tempo_Irriga.hFimSetor2) && (timeinfo.tm_min == tempo_Irriga.mFimSetor2))
+  {
+    flagLigaSetor2 = 0;
+  }
+
 
   //Define a seleção
   if((flagLigaCaixa) && (!flagOcupado))
@@ -366,6 +378,7 @@ void checarSensores(void)
         //pega tempo que começou a irrigar setor 1
         tempo_Irriga.hInicioSetor1 = timeinfo.tm_hour;
         tempo_Irriga.mInicioSetor1 = timeinfo.tm_min;
+        calculoTempo(tempo_Irriga.hInicioSetor1, tempo_Irriga.mInicioSetor1, 1);
       }
       else
       {
@@ -375,22 +388,30 @@ void checarSensores(void)
         //pega tempo que começou a irrigar setor 2
         tempo_Irriga.hInicioSetor2 = timeinfo.tm_hour;
         tempo_Irriga.mInicioSetor2 = timeinfo.tm_min;
+        calculoTempo(tempo_Irriga.hInicioSetor2, tempo_Irriga.mInicioSetor2, 2);
       }
       }
     }
   }
 }
 
-void calculoTempo(int hInicio, int mInicio)
+void calculoTempo(int hInicio, int mInicio, int setor)
 {
   int totalMinutos = 0;
-  int novaHora = 0;
-  int novoMinuto = 0;
-
-  totalMinutos = (hInicio * 60) + mInicio;
-  novaHora = ((totalMinutos/60) % 24);
-  novoMinuto = totalMinutos % 60;
-
+  
+  if(setor == 1)
+  {
+    totalMinutos = (hInicio * 60) + mInicio + conf_Irriga.duracao;
+    tempo_Irriga.hFimSetor1 = ((totalMinutos/60) % 24);
+    tempo_Irriga.mFimSetor1 = totalMinutos % 60;
+  }
+  
+  if(setor == 2)
+  {
+    totalMinutos = (hInicio * 60) + mInicio + conf_Irriga.duracao;
+    tempo_Irriga.hFimSetor2 = ((totalMinutos/60) % 24);
+    tempo_Irriga.mFimSetor2 = totalMinutos % 60;
+  }
 }
 
 void encherCaixa(void)
@@ -399,7 +420,7 @@ void encherCaixa(void)
   {
     flagOcupado = 1;
     reles.offAll();
-    delay(2000);
+    //delay(2000);
     reles.on(1);
     delay(5000);
     reles.on(0);
@@ -422,7 +443,7 @@ void ligaBomba(void)
   if((flagLigaBomba)&& (!flagOcupado))
   {
     reles.offAll();
-    delay(2000);
+    //delay(2000);
     flagOcupado = 1;
     reles.on(0);
     Serial.println("Bomba Ligada");
@@ -443,7 +464,7 @@ void ligaSetor1(void)
   {
     flagOcupado = 1;
     reles.offAll();
-    delay(2000);
+    //delay(2000);
     reles.on(2);
     delay(5000);
     reles.on(0);
@@ -457,7 +478,7 @@ void ligaSetor1(void)
     reles.off(2);
     flagOcupado = 0;
     flagSelecao = 0;
-    Serial.println("Irrigando Setor 1 Desligada");
+    Serial.println("Desligado Setor 1");
   }
 }
 
@@ -467,7 +488,7 @@ void ligaSetor2(void)
   {
     flagOcupado = 1;
     reles.offAll();
-    delay(2000);
+    //delay(2000);
     reles.on(3);
     delay(5000);
     reles.on(0);
@@ -481,6 +502,6 @@ void ligaSetor2(void)
     reles.off(3);
     flagOcupado = 0;
     flagSelecao = 0;
-    Serial.println("Irrigando Setor 2 Desligada");
+    Serial.println("Desligado Setor 2");
   }
 }
