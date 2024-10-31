@@ -111,7 +111,6 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
 const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = -14400; //GMT Time Brazil
 const int   daylightOffset_sec = 3600;
-int diaDaSemana = 0;
 
 //Inicializar Classes - Instanciar
 ModuloRele reles(RELAYS[0], RELAYS[1], RELAYS[2], RELAYS[3], true);
