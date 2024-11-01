@@ -20,6 +20,12 @@
 #define BEEP                18 
 #define UMIDADE             13
 
+/* Outras configurações */
+#define TEMPO_BEEP_RAPIDO       200         //Tempo em milesegundos
+#define INTERVALO_BEEPS         100         //Tempo em milesegundos
+#define TEMPO_DE_ESPERA_VAZAO   30000       //Tempo em milesegundos ( 10 segundos)
+#define TEMPO_INTERVALO         5           //Tempo de intervalo para iniciar o segundo setor
+
 /* Variáveis */
 const int RELAYS[N_RELES] = {RELE_BOMBA, RELE_CAIXA, RELE_SETOR_1, RELE_SETOR_2};
 bool flagLigaCaixa = 0;
@@ -53,8 +59,13 @@ struct tempoAtual
 };
 
 //---- WiFi settings
+//Lu e Deza
 const char* ssid = "Lu e Deza";
 const char* password = "liukin1208";
+
+//Cumbuco: VALERIO
+//const char* ssid = "VALERIO";
+//const char* password = "ccub1320";
 
 // Dados para acesso ao MQTT
 const char* mqtt_server = "503847782e204ff99743e99127691fe7.s1.eu.hivemq.cloud";    //Host do broker
@@ -133,7 +144,8 @@ void ligaBomba(void);
 void ligaSetor1(void);
 void ligaSetor2(void);
 void calculoTempo(int hInicio, int mInicio, int setor);
-
+void beepSinal(int duracao);
+void sequenciaBeeps(int beeps, int duracao, int intervalo);
 
 void setup() 
 {
@@ -158,6 +170,12 @@ void setup()
   //Inicializa Sensores
   initSensores();
 
+  //beep
+  /* Habilitar pino do BEEP */
+  pinMode(BEEP, OUTPUT);
+  
+  /* Sinal sonoro */
+    sequenciaBeeps(1, TEMPO_BEEP_RAPIDO, INTERVALO_BEEPS);
 }
 
 void loop() 
@@ -172,7 +190,6 @@ void loop()
   checarSensores();
   monitoraFlags();
 }
-
 
 
 // Funções
@@ -417,11 +434,11 @@ void encherCaixa(void)
   {
     flagOcupado = 1;
     reles.offAll();
-    delay(2000);
+    delay(1000);
     reles.on(1);
     delay(5000);
     reles.on(0);
-    Serial.println("Enchendo a Caixa");
+    //Serial.println("Enchendo a Caixa");
   }
   
   if((!flagLigaCaixa) && (flagOcupado))
@@ -431,7 +448,7 @@ void encherCaixa(void)
     reles.off(1);
     flagOcupado = 0;
     flagSelecao = 0;
-    Serial.println("Caixa cheia");
+    //Serial.println("Caixa cheia");
   }
 }
 
@@ -440,10 +457,11 @@ void ligaBomba(void)
   if((flagLigaBomba)&& (!flagOcupado))
   {
     reles.offAll();
-    delay(2000);
+    delay(1000);
     flagOcupado = 1;
     reles.on(0);
-    Serial.println("Bomba Ligada");
+    //Serial.println("Bomba Ligada");
+    beepSinal(TEMPO_BEEP_RAPIDO);
   }
 
   if((!flagLigaBomba) && (flagOcupado))
@@ -451,7 +469,7 @@ void ligaBomba(void)
     reles.off(0);
     flagOcupado = 0;
     flagSelecao = 0;
-    Serial.println("Bomba desligada");
+    //Serial.println("Bomba desligada");
   }
 }
 
@@ -461,11 +479,11 @@ void ligaSetor1(void)
   {
     flagOcupado = 1;
     reles.offAll();
-    delay(2000);
+    delay(1000);
     reles.on(2);
     delay(5000);
     reles.on(0);
-    Serial.println("Irrigando Setor 1");
+    //Serial.println("Irrigando Setor 1");
   }
   
   if((!flagLigaSetor1) && (flagOcupado))
@@ -475,7 +493,7 @@ void ligaSetor1(void)
     reles.off(2);
     flagOcupado = 0;
     flagSelecao = 0;
-    Serial.println("Desligado Setor 1");
+    //Serial.println("Desligado Setor 1");
   }
 }
 
@@ -485,11 +503,11 @@ void ligaSetor2(void)
   {
     flagOcupado = 1;
     reles.offAll();
-    delay(2000);
+    delay(1000);
     reles.on(3);
     delay(5000);
     reles.on(0);
-    Serial.println("Irrigando Setor 2");
+    //Serial.println("Irrigando Setor 2");
   }
   
   if((!flagLigaSetor2) && (flagOcupado))
@@ -499,6 +517,22 @@ void ligaSetor2(void)
     reles.off(3);
     flagOcupado = 0;
     flagSelecao = 0;
-    Serial.println("Desligado Setor 2");
+    //Serial.println("Desligado Setor 2");
   }
+}
+
+void beepSinal(int duracao)     //Duracao em milesegundos
+{
+    digitalWrite(BEEP, HIGH);
+    delay(duracao);
+    digitalWrite(BEEP, LOW);
+}
+
+void sequenciaBeeps(int beeps, int duracao, int intervalo)
+{
+    for(int i = 0; i < beeps; i++)
+    {
+        beepSinal(duracao);
+        delay(intervalo);
+    }
 }
