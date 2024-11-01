@@ -60,12 +60,12 @@ struct tempoAtual
 
 //---- WiFi settings
 //Lu e Deza
-const char* ssid = "Lu e Deza";
-const char* password = "liukin1208";
+//const char* ssid = "Lu e Deza";
+//const char* password = "liukin1208";
 
 //Cumbuco: VALERIO
-//const char* ssid = "VALERIO";
-//const char* password = "ccub1320";
+const char* ssid = "VALERIO";
+const char* password = "ccub1320";
 
 // Dados para acesso ao MQTT
 const char* mqtt_server = "503847782e204ff99743e99127691fe7.s1.eu.hivemq.cloud";    //Host do broker
@@ -198,6 +198,7 @@ void loop()
 //Conecta Wifi
 void setup_wifi(void) 
 {
+  int contagem = 0;
   delay(10);
   // Conectar a rede wifi
   Serial.println();
